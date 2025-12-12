@@ -4,7 +4,6 @@ Captstone Project for Tranlator(Gemini API and GTTS)
 ---
 
 ```markdown
-# Architecture & Design Document
 
 ## 1. Introduction
 
