@@ -2,6 +2,6 @@ streamlit
 google-genai
 gTTS
 pandas
-PyPDF2
+pypdf
 openpyxl
 pytest
