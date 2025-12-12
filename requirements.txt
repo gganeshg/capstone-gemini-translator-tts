@@ -1,0 +1,7 @@
+streamlit 
+google-genai
+gTTS
+pandas
+pypdf
+openpyxl
+pytest
