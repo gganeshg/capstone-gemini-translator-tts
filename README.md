@@ -81,8 +81,9 @@ A more detailed description is available in `docs/architecture.md`.
 ├── .gitignore
 ├── README.md
 ├── docs/
-│   └── architecture.md        # High-level design / architecture document
-|   └── technical_flow.md      # High-level technical flow document 
+│   └── architecture_details.md  # High-level design / architecture document
+|   └── architecture_diagram.md  # High-level architecture diagrm 
+|   └── technical_flow.md        # High-level technical flow document 
 ├── config/
 │   └── languages.py         # Language mappings (name -> code)
 ├── services/
