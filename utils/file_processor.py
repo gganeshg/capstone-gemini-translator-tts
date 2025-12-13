@@ -1,6 +1,5 @@
 import io
 import pandas as pd
-# from PyPDF2 import PdfReader
 from pypdf import PdfReader
 
 class FileProcessor:

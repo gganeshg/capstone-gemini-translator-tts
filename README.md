@@ -26,69 +26,76 @@ This document describes the architecture and design of the **Text Translator & T
 - Secure handling of API keys (no keys in source code).
 - Reasonable performance for typical text sizes (e.g., up to a few pages of text).
 
-## 4. High-Level Architecture
+## Features
 
-The system is organized into three main layers:
+- 🌐 **Text translation** using Gemini (via `google-genai` or `google-generativeai`)
+- 🗂️ **File support**:
+  - Plain text (`.txt`)
+  - PDF (`.pdf`)
+  - CSV (`.csv`)
+  - Excel (`.xls`, `.xlsx`)
+- 🔉 **Text-to-Speech (TTS)**:
+  - Uses `gTTS` to generate MP3 audio files
+  - In-app audio player
+  - MP3 download option
+- 📌 **User-friendly interface** built with Streamlit:
+  - Tabs for "Type Text" and "Upload File"
+  - Language dropdown
+  - Clear error messages and status indicators
 
-1. **Presentation Layer (Streamlit UI)**  
-   - Provides the web interface.
-   - Handles user input (text, files, language choice).
-   - Triggers translation and audio generation actions.
-   - Displays results and error messages.
+---
 
-2. **Application / Service Layer**
-   - `GeminiClient`: Low-level wrapper around the Gemini API.
-   - `TranslationService`: Business logic for translating text.
-   - `TextToSpeechService`: Business logic for converting text to speech using gTTS.
+## Architecture Overview
+
+The application follows a simple layered architecture:
+
+1. **UI Layer (Streamlit)**
+   - Handles user interactions (text input, file upload, language selection, button clicks).
+   - Displays original text, translated text, and audio playback.
+
+2. **Service Layer**
+   - `GeminiClient`  
+     - Wraps the Gemini API client and sends translation prompts.
+   - `TranslationService`  
+     - Uses `GeminiClient` to translate input text.
+   - `TextToSpeechService`  
+     - Uses `gTTS` to generate MP3 audio files from translated text.
 
 3. **Utility Layer**
-   - `FileProcessor`: Responsible for reading uploaded files and extracting plain text.
+   - `FileProcessor`  
+     - Reads uploaded files (TXT, PDF, CSV, Excel).
+     - Extracts and normalizes text from each file type.
 
-Configuration, such as supported languages, is stored in `config/languages.py`.
+4. **Configuration**
+   - `config/languages.py` maintains a mapping between user-facing language names and language codes used by gTTS.
 
-## 5. Component Design
+A more detailed description is available in `docs/architecture.md`.
 
-### 5.1 GeminiClient
+5. **Repository Structure**
+## Repository Structure
 
-- **Responsibilities:**
-  - Initialize the Gemini client using an API key from environment variables.
-  - Build translation prompts.
-  - Send requests to the Gemini model.
-  - Return the translated text.
-
-- **Key Method:**
-  - `translate(text: str, target_language: str) -> str`
-
-### 5.2 TranslationService
-
-- **Responsibilities:**
-  - Validate input.
-  - Call `GeminiClient` to perform translation.
-  - Provide a simple interface to the UI for translation.
-
-- **Key Method:**
-  - `translate_text(text: str, target_language_name: str) -> str`
-
-### 5.3 TextToSpeechService
-
-- **Responsibilities:**
-  - Accept translated text and a language code.
-  - Use `gTTS` to generate speech audio.
-  - Save the output as an MP3 file on disk and return the file path.
-
-- **Key Method:**
-  - `synthesize(text: str, lang_code: str) -> str`
-
-### 5.4 FileProcessor
-
-- **Responsibilities:**
-  - Inspect the uploaded file type.
-  - For TXT: read and decode text.
-  - For PDF: use `PyPDF2` to extract text from each page.
-  - For CSV/Excel: use `pandas` to read tabular data and join cell contents into lines of text.
-
-- **Key Method:**
-  - `extract_text(file) -> str`
+```text
+.
+├── app.py                   # Streamlit entrypoint
+├── requirements.txt
+├── .gitignore
+├── README.md
+├── docs/
+│   └── architecture.md        # High-level design / architecture document
+|   └── technical_flow.md      # High-level technical flow document 
+├── config/
+│   └── languages.py         # Language mappings (name -> code)
+├── services/
+│   ├── gemini_client.py     # Low-level Gemini API wrapper
+│   ├── translator.py        # TranslationService using GeminiClient
+│   └── tts_service.py       # TextToSpeechService using gTTS
+├── utils/
+│   └── file_processor.py    # Extract text from TXT/PDF/CSV/Excel uploads
+└── tests/
+    ├── test_translator.py
+    ├── test_file_processor.py
+    └── test_tts_service.py
+```
 
 ## 6. Data Flow
 
