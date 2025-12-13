@@ -11,11 +11,19 @@ translator = TranslationService()
 tts_service = TextToSpeechService()
 file_processor = FileProcessor()
 
+# ---- Initialize session state keys ----
+if "source_text_display" not in st.session_state:
+    st.session_state["source_text_display"] = ""
+if "translated_text" not in st.session_state:
+    st.session_state["translated_text"] = ""
+if "audio_file_path" not in st.session_state:
+    st.session_state["audio_file_path"] = None
+
 st.title("🌐 Text Translator & Text-to-Speech (Gemini + gTTS)")
 
 st.sidebar.header("Settings")
 target_language_name = st.sidebar.selectbox(
-    "Choose target language",
+    "Choose target target language",
     list(LANGUAGE_OPTIONS.keys()),
     index=1,  # default maybe Spanish
 )
@@ -32,11 +40,13 @@ st.sidebar.markdown(
 
 tab1, tab2 = st.tabs(["✍️ Type Text", "📁 Upload File"])
 
-input_text = ""
+# We keep manual text and uploaded text separate, and use source_text_display
+# as the single "authoritative" text to translate.
 
 with tab1:
     st.subheader("Enter text to translate")
-    input_text = st.text_area("Enter text here", height=200, key="text_input")
+    # Streamlit will store this in st.session_state["text_input"]
+    st.text_area("Enter text here", height=200, key="text_input")
 
 with tab2:
     st.subheader("Upload a file")
@@ -45,16 +55,38 @@ with tab2:
         type=["pdf", "txt", "csv", "xls", "xlsx"],
         key="file_upload"
     )
-    if uploaded_file is not None and not input_text.strip():
+    if uploaded_file is not None:
         try:
-            input_text = file_processor.extract_text(uploaded_file)
+            extracted_text = file_processor.extract_text(uploaded_file)
+            # Always replace the source text with the new file content
+            st.session_state["source_text_display"] = extracted_text
             st.success("File loaded successfully. You can review the extracted text below.")
         except Exception as e:
             st.error(f"Error reading file: {e}")
 
-if input_text:
+# ---- Decide what the current source text is ----
+current_source_text = st.session_state.get("source_text_display", "")
+manual_text = st.session_state.get("text_input", "")
+
+# If there is no uploaded/edited source text yet, but the user has typed something,
+# initialize source_text_display from the manual text.
+if not current_source_text and manual_text.strip():
+    st.session_state["source_text_display"] = manual_text
+    current_source_text = manual_text
+
+# Show the combined "Extracted / Original Text" area if we have any text at all
+if current_source_text.strip():
     st.markdown("**Extracted / Original Text:**")
-    st.text_area("Source text", value=input_text, height=200, key="source_text_display")
+    # This text_area is bound directly to source_text_display; any edits here
+    # become the text that will be translated.
+    st.text_area(
+        "Source text",
+        height=200,
+        key="source_text_display"
+    )
+
+# For translation logic, always use whatever is currently in source_text_display
+input_text = st.session_state.get("source_text_display", "")
 
 translated_text = st.session_state.get("translated_text", "")
 
@@ -76,7 +108,6 @@ with col1:
                     st.error(f"Translation failed: {e}")
 
 with col2:
-    audio_file_path = None
     if st.button("Generate Audio"):
         translated_text = st.session_state.get("translated_text", "")
         if not translated_text:
@@ -97,6 +128,7 @@ translated_text = st.session_state.get("translated_text", "")
 if translated_text:
     st.markdown("### Translated Text")
     st.text_area("Translated output", translated_text, height=200)
+
 # Display audio
 audio_file_path = st.session_state.get("audio_file_path")
 if audio_file_path:

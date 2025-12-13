@@ -1,14 +1,10 @@
 import io
 import pandas as pd
-from pypdf import PdfReader
+from pypdf import PdfReader  # assuming you already moved to pypdf
 
 class FileProcessor:
     @staticmethod
     def extract_text(file) -> str:
-        """
-        file: UploadedFile from Streamlit (has .type and .name)
-        Returns: plain text.
-        """
         mime = file.type.lower()
 
         if mime == "text/plain":
@@ -17,8 +13,11 @@ class FileProcessor:
         if mime == "application/pdf":
             return FileProcessor._extract_pdf_text(file)
 
-        if mime in ("text/csv", "application/vnd.ms-excel",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"):
+        if mime in (
+            "text/csv",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ):
             return FileProcessor._extract_table_text(file)
 
         raise ValueError(f"Unsupported file type: {mime}")
@@ -32,17 +31,21 @@ class FileProcessor:
 
     @staticmethod
     def _extract_table_text(file) -> str:
-        # Use pandas to read CSV/Excel; then join all cells into lines.
+        # Reset pointer just in case
+        file.seek(0)
+
+        # Try CSV first (no header so we don't lose first row)
         try:
-            df = pd.read_csv(file)
+            df = pd.read_csv(file, header=None)
         except Exception:
+            # Reset pointer again for Excel read
             file.seek(0)
-            df = pd.read_excel(file)
+            df = pd.read_excel(file, header=None)
 
         lines = []
         for _, row in df.iterrows():
-            # join all non-null cells with spaces
             cells = [str(x) for x in row.tolist() if pd.notna(x)]
             if cells:
                 lines.append(" ".join(cells))
+
         return "\n".join(lines)
