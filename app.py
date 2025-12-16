@@ -57,10 +57,18 @@ with tab2:
     )
     if uploaded_file is not None:
         try:
-            extracted_text = file_processor.extract_text(uploaded_file)
-            # Always replace the source text with the new file content
-            st.session_state["source_text_display"] = extracted_text
-            st.success("File loaded successfully. You can review the extracted text below.")
+            extracted_text = file_processor.extract_text(uploaded_file) or ""
+            extracted_text = extracted_text.strip()
+            # st.write("DEBUG type:", type(extracted_text), "len:", len(extracted_text))
+
+            if not extracted_text:
+                st.error("Uploaded file appears to be empty or could not be read. Please try again.")
+            else:
+                st.session_state["source_text_display"] = extracted_text
+                st.success("File loaded successfully.")    
+                # Always replace the source text with the new file content 
+                # st.session_state["source_text_display"] = extracted_text
+                # st.success("File loaded successfully. You can review the extracted text below.")
         except Exception as e:
             st.error(f"Error reading file: {e}")
 
@@ -125,7 +133,11 @@ with col2:
 
 # Display translation
 translated_text = st.session_state.get("translated_text", "")
+
 if translated_text:
+    # Debug Statements
+    # st.write("Lines extracted:", len(input_text.splitlines()))
+    # st.text_area("Debug: extracted preview", input_text[:2000], height=200)
     st.markdown("### Translated Text")
     st.text_area("Translated output", translated_text, height=200)
 

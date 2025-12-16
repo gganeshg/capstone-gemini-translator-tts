@@ -23,4 +23,4 @@ class GeminiClient:
             model=self.model,
             contents=prompt,
         )
-        return response.text.strip()
+        return (response.text or "").strip()
