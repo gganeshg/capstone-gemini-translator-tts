@@ -1,0 +1,7 @@
+empId,first_name,last_name,email,group,department
+1001,John,Doe,john.doe@email.com,Engineering,MachineLearning
+1002,Mike,Lewis,mike.lewis@email.com,Engineering,Data
+1003,ravi,kumar,ravi.kumar@email.com,Engineering,Software
+1004,Susan,Wang,susan.wang@email.com,Administration,Payroll
+1005,suresh,nair,suresh.nair@email.com,Finance,Accounts
+1006,csv,user,csv.user@email.com,TestData,CsvDataFile

@@ -1,0 +1,7 @@
+empId	first_name	last_name	email					group			department
+1001	John		Doe			john.doe@email.com		Engineering		MachineLearning
+1002	Mike		Lewis		mike.lewis@email.com	Engineering		Data
+1003	ravi		Kumar		ravi.kumar@email.com	Engineering		Software
+1004	Susan		Wang		susan.wang@email.com	Administration	Payroll
+1005	Suresh		Nair		suresh.nair@email.com	Finance			Accounts
+1006	Text		User		text.user@email.com		TestData		TextDataFile
